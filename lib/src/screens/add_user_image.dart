@@ -37,10 +37,13 @@ class _AddUserImageState extends State<AddUserImage> {
                   bottom: 20,
                   left: 20,
                   child: IconButton(
-                    color: Colors.blue,
+                      color: Colors.blue,
                       highlightColor: Colors.blue,
                       disabledColor: Colors.blue,
-                      icon: Icon(Icons.edit,color: Colors.blue,),
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.blue,
+                      ),
                       onPressed: () {
                         _cropImage();
                       }),
@@ -51,9 +54,10 @@ class _AddUserImageState extends State<AddUserImage> {
                   bottom: 20,
                   left: 80,
                   child: IconButton(
-                      icon: Icon(Icons.file_upload,color: Colors.blue),
-                      onPressed: () {
-                        _userProvider.uploadImage(_image);
+                      icon: Icon(Icons.file_upload, color: Colors.blue),
+                      onPressed: () async {
+                        await _userProvider.uploadImage(_image);
+                        Navigator.pop(context);
                       }),
                 )
               : Container(),

@@ -64,13 +64,18 @@ class _SignInWidgetState extends State<SignInWidget> {
 
       await _productProvider.nexusDeals();
       await _productProvider.keellsDeals();
-      print("&&&&&&&&&&&**********************************&&&&&&&&&&&&&&&&&&________________________________");
       await _productProvider.getFavouriteProducts(_userProvider.user.id);
+
+      await _productProvider.getCardProducts(_userProvider.user.id);
 
       Navigator.pushReplacement(
           widget._context, MaterialPageRoute(builder: (context) => HomePage()));
+
+      _userProvider.isLoading = false;
+
     }
 
-    _userProvider.isLoading = false;
+
+
   }
 }

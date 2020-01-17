@@ -74,7 +74,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     } else {
       print(" sign up success");
 
-      Navigator.push(widget._context,
+      Navigator.pushReplacement(widget._context,
           MaterialPageRoute(builder: (context) => VerifyPage()));
     }
   }

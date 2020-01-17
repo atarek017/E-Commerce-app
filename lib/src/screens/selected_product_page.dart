@@ -1,7 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:soaqtwo/src/core/models/cardProductItem.dart';
+import 'package:soaqtwo/src/core/models/faild_request.dart';
 import 'package:soaqtwo/src/core/providers/product_provider.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:soaqtwo/src/core/providers/user_provider.dart';
+import 'package:soaqtwo/src/widgets/auth_widgets/dialog.dart';
 
 class SelectedProductPage extends StatefulWidget {
   String title;
@@ -15,30 +20,26 @@ class SelectedProductPage extends StatefulWidget {
 }
 
 class _SelectedProductPageState extends State<SelectedProductPage> {
-//  ProductProvider _productProvider;
+  ProductProvider _productProvider;
+  UserProvider _userProvider;
 
-  Icon _favIcon;
+  Icon _favIcon = Icon(
+    Icons.favorite_border,
+    color: Colors.green,
+  );
+  bool _isFave = false;
+
   double height;
   double width;
   int _counter = 1;
 
   @override
   Widget build(BuildContext context) {
-    height = MediaQuery
-        .of(context)
-        .size
-        .height;
-    width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
 
-//    _productProvider = Provider.of<ProductProvider>(context);
-    _favIcon = Icon(
-      Icons.favorite_border,
-      color: Colors.green,
-    );
-
+    _productProvider = Provider.of<ProductProvider>(context);
+    _userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       backgroundColor: Colors.cyan[50],
       appBar: AppBar(
@@ -106,7 +107,7 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
             ),
           ),
           Image.network(
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcS3TPKVJU0dedNjsxtaOeR9F7gY-ucPCJM311c5wdasQJO2swFe",
+            _productProvider.selectedProduct.photo,
             height: 70,
             alignment: Alignment.center,
             fit: BoxFit.cover,
@@ -116,7 +117,7 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
             child: IconButton(
                 icon: _favIcon,
                 onPressed: () {
-//                  _setFavourite();
+                  _setFavourite();
                 }),
           )
         ],
@@ -144,16 +145,20 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
             height: height * .15,
           ),
           Text(
-            "DDFSsds",
+            _productProvider.selectedProduct.name,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           SizedBox(
             height: 5,
           ),
           Text(
-            "Rs. 1,100.0",
+            "Rs. " + _productProvider.selectedProduct.price.toString(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
+          SizedBox(
+            height: 5,
+          ),
+          ratingBar(),
           SizedBox(
             height: 30,
           ),
@@ -164,7 +169,15 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
           SizedBox(
             height: 5,
           ),
-          quantityCounter()
+          quantityCounter(),
+          SizedBox(
+            height: 30,
+          ),
+          buyNow(),
+          SizedBox(
+            height: 10,
+          ),
+          addToCard()
         ],
       ),
     );
@@ -194,7 +207,11 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
           ),
           onTap: () {
             setState(() {
-              _counter--;
+              if (_counter == 1) {
+                _counter = 1;
+              } else {
+                _counter--;
+              }
             });
           },
         ),
@@ -234,5 +251,100 @@ class _SelectedProductPageState extends State<SelectedProductPage> {
         ),
       ],
     );
+  }
+
+  Widget ratingBar() {
+    return RatingBar(
+      initialRating: double.parse(_productProvider.selectedProduct.rate),
+      tapOnlyMode: false,
+      direction: Axis.horizontal,
+      allowHalfRating: true,
+      itemCount: 5,
+      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+      itemSize: 25,
+      itemBuilder: (context, _) => Icon(
+        Icons.star,
+        color: Colors.deepOrange,
+      ),
+    );
+  }
+
+  Widget buyNow() {
+    return GestureDetector(
+      child: Container(
+        width: width * .7,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.green, width: 2),
+        ),
+        child: Center(
+          child: Text(
+            "Buy Now",
+            style: TextStyle(color: Colors.green, fontSize: 16),
+          ),
+        ),
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget addToCard() {
+    return GestureDetector(
+      child: Container(
+        width: width * .7,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            "Add To Card",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      ),
+      onTap: () async {
+        var res = await _productProvider.addToCard(CardProductItem(
+            quantity: _counter,
+            productId: _productProvider.selectedProduct.id,
+            userId: _userProvider.user.id));
+
+
+        if (res is FailedRequest) {
+          Dialogs.showErrorDialog(context,
+              message: res.message, code: res.code);
+          print('results ${res.toString()}');
+        }else{
+          await _productProvider.getCardProducts(_userProvider.user.id);
+
+          Dialogs.showErrorDialog(context,
+              message: "added sucessfuly", code: 200);
+        }
+
+
+      },
+    );
+  }
+
+  _setFavourite() {
+    setState(() {
+      if (_isFave == true) {
+        _favIcon = Icon(
+          Icons.favorite_border,
+          color: Colors.green,
+        );
+
+        _isFave = false;
+      } else {
+        _favIcon = Icon(
+          Icons.favorite,
+          color: Colors.green,
+        );
+        _isFave = true;
+      }
+    });
   }
 }

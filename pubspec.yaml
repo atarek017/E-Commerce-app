@@ -33,10 +33,10 @@ dependencies:
   google_maps_flutter: ^0.5.11
   geolocator: ^5.0.0
   geocoder: ^0.2.1
+  flutter_rating_bar: ^3.0.1+1
   flutter_verification_code_input:
     git:
       url: git://github.com/tinylife-io/flutter_verification_code_input.git
-
 
 
 dev_dependencies:

@@ -71,7 +71,7 @@ class _StoreState extends State<Store> {
       backgroundColor: Colors.green,
       automaticallyImplyLeading: false,
       title: Text(
-        'Soaq',
+        'Keells',
         style: TextStyle(color: Colors.white),
       ),
       actions: <Widget>[

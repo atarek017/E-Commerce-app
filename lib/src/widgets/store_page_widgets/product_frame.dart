@@ -18,14 +18,17 @@ class ProductFrame extends StatefulWidget {
 class _ProductFrameState extends State<ProductFrame> {
   ProductProvider _productProvider;
   UserProvider _userProvider;
-  Icon _favIcon;
+  Icon _favIcon = Icon(
+    Icons.favorite_border,
+    color: Colors.green,
+  );
+  bool _isFave = false;
 
   @override
   Widget build(BuildContext context) {
     _productProvider = Provider.of<ProductProvider>(context);
     _userProvider = Provider.of<UserProvider>(context);
 
-    _favIcon = Icon(Icons.favorite_border,color: Colors.green,);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -76,9 +79,7 @@ class _ProductFrameState extends State<ProductFrame> {
                 child: IconButton(
                     icon: _favIcon,
                     onPressed: () {
-
-                        _setFavourite();
-
+                      _setFavourite();
                     }),
               )
             ],
@@ -102,14 +103,31 @@ class _ProductFrameState extends State<ProductFrame> {
   }
 
   _setFavourite() async {
-    var res = await _productProvider.setFavourite(
-        _userProvider.user.id, widget.product.id);
+    if (_isFave == true) {
+      _favIcon = Icon(
+        Icons.favorite_border,
+        color: Colors.green,
+      );
 
-    if (res is FailedRequest) {
+      _isFave = false;
     } else {
-      setState(() {
-        _favIcon = Icon(Icons.favorite,color: Colors.green,);
-      });
+      _favIcon = Icon(
+        Icons.favorite,
+        color: Colors.green,
+      );
+
+      var res = await _productProvider.setFavourite(
+          _userProvider.user.id, widget.product.id);
+
+      if (res == FailedRequest) {
+        _isFave = false;
+      }else{
+        _isFave = true;
+
+      }
+
     }
+
+    setState(() {});
   }
 }

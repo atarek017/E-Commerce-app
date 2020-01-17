@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_verification_code_input/flutter_verification_code_input.dart';
 import 'package:provider/provider.dart';
 import 'package:soaqtwo/src/core/models/faild_request.dart';
+import 'package:soaqtwo/src/core/providers/product_provider.dart';
 import 'package:soaqtwo/src/core/providers/user_provider.dart';
 import 'package:soaqtwo/src/widgets/auth_widgets/dialog.dart';
 
@@ -20,10 +21,11 @@ class _VerifyPageState extends State<VerifyPage> {
 
   bool verify = false;
   String code;
-
+  ProductProvider _productProvider;
   @override
   Widget build(BuildContext context) {
     _userProvider = Provider.of<UserProvider>(context);
+    _productProvider = Provider.of<ProductProvider>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -169,6 +171,12 @@ class _VerifyPageState extends State<VerifyPage> {
                 message: res.message, code: res.code);
             print('results ${res.toString()}');
           } else {
+
+            await _productProvider.nexusDeals();
+            await _productProvider.keellsDeals();
+            await _productProvider.getFavouriteProducts(_userProvider.user.id);
+
+            await _productProvider.getCardProducts(_userProvider.user.id);
             Navigator.pushReplacement(
                 context, MaterialPageRoute(builder: (context) => HomePage()));
           }
